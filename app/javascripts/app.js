@@ -1,5 +1,11 @@
 // Import the page's CSS. Webpack will know what to do with it.
-import "../stylesheets/app.css";
+// import "../stylesheets/app.css";
+
+// import "../stylesheets/bootstrap.css";
+// import "../font-awesome/css/font-awesome.css";
+// import "../stylesheets/animate.css";
+// import "../stylesheets/style.css";
+
 
 // Import libraries we need.
 import { default as Web3} from 'web3';
@@ -20,7 +26,7 @@ var account;
 window.App = {
   start: function() {
     var self = this;
-
+console.log('kkkkkkkk');
     // Bootstrap the MetaCoin abstraction for Use.
     MetaCoin.setProvider(web3.currentProvider);
 
