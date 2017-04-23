@@ -8580,6 +8580,6 @@ body.md-skin {
   margin-left: -25px;
   margin-top: -25px;
 }
-#box_insurance{
+#box_insurance,#box_vehicle{
   display: none;
 }

@@ -1,6 +1,5 @@
-var InsurerContract = artifacts.require("Insurer");
-var DMVContract = artifacts.require("DMV");
+var DMVContract = artifacts.require("FloridaDepartmentOfMotorVehicles");
 
 module.exports = function(deployer) {
-  deployer.deploy(DMVContract,"Ontario");
+  deployer.deploy(DMVContract);
 };

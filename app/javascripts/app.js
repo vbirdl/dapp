@@ -7,7 +7,7 @@ import { default as Web3} from 'web3';
 import { default as contract } from 'truffle-contract'
 
 // Import our contract artifacts and turn them into usable abstractions.
-import dmv_artifacts from '../../build/contracts/DMV.json'
+import dmv_artifacts from '../../build/contracts/FloridaDepartmentOfMotorVehicles.json'
 
 // MetaCoin is our usable abstraction, which we'll use through the code below.
 var dmvContract = contract(dmv_artifacts);
@@ -42,73 +42,163 @@ window.App = {
     });
   },
 
-  setStatus: function(message) {
-    var status = document.getElementById("status");
-    status.innerHTML = message;
+  showAlert: function(message){
+    console.log(message);
+    sweetAlert("Oops...", message, "error");
+  },
+  showSuccess: function(message){
+    swal("Success!", message, "success");
   },
 
   searchInsurance: function() {
     var self = this;
+    var addr = $("#input_search_insurance").val();
+    self.searchInsuranceByAddress(addr);
+  },
+
+  searchInsuranceByAddress: function(addr){
+    var self = this;
     var dmv;
-    var keyword = $("#input_search_insurance").val();
 
     dmvContract.deployed().then(function(instance) {
-      $("#box_insurance").fadeOut();
       dmv = instance;
-      return dmv.IsApprovedInsurer.call(keyword, {from: account});
+      return dmv.IsApprovedInsurer.call(addr);
 
     }).then(function(value) {
-      $("#insurance_address").text(keyword);
-      if (value) {
-        $("#insurance_validation").text("Valid");
-      }else{
-        $("#insurance_validation").text("Invalid");
-      }
-      $("#box_insurance").fadeIn();
-
+      $("#box_insurance").fadeOut('slow', function() {
+        $("#insurance_address").text(addr);
+        if (value) {
+          $("#insurance_validation").text("Valid");
+        }else{
+          $("#insurance_validation").text("Invalid");
+        }
+        $("#box_insurance").fadeIn();
+      });
     }).catch(function(e) {
-      console.log(e);
-      self.setStatus("Error search insurance; see log.");
+      self.showAlert(e);
     });
   },
-
-  refreshBalance: function() {
+  approveInsurance: function() {
     var self = this;
+    var dmv;
+    var addr = $("#insurance_address").text();
 
-    var meta;
-    MetaCoin.deployed().then(function(instance) {
-      meta = instance;
-      return meta.getBalance.call(account, {from: account});
-    }).then(function(value) {
-      var balance_element = document.getElementById("balance");
-      balance_element.innerHTML = value.valueOf();
-    }).catch(function(e) {
-      console.log(e);
-      self.setStatus("Error getting balance; see log.");
-    });
-  },
-
-  sendCoin: function() {
-    var self = this;
-
-    var amount = parseInt(document.getElementById("amount").value);
-    var receiver = document.getElementById("receiver").value;
-
-    this.setStatus("Initiating transaction... (please wait)");
-
-    var meta;
-    MetaCoin.deployed().then(function(instance) {
-      meta = instance;
-      return meta.sendCoin(receiver, amount, {from: account});
+    dmvContract.deployed().then(function(instance) {
+      dmv = instance;
+      return dmv.ApproveInsurer(addr, {from:account});
     }).then(function() {
-      self.setStatus("Transaction complete!");
-      self.refreshBalance();
+      self.searchInsuranceByAddress(addr);
+
     }).catch(function(e) {
-      console.log(e);
-      self.setStatus("Error sending coin; see log.");
+      self.showAlert(e);
+    });
+  },
+  revokeInsurance: function() {
+    var self = this;
+    var dmv;
+    var addr = $("#insurance_address").text();
+
+    dmvContract.deployed().then(function(instance) {
+      dmv = instance;
+      return dmv.DisapproveInsurer(addr, {from:account});
+    }).then(function() {
+      self.searchInsuranceByAddress(addr);
+
+    }).catch(function(e) {
+      self.showAlert(e);
+    });
+  },
+
+  searchVehicleByPlate: function(plate){
+    var self = this;
+    var dmv;
+
+    dmvContract.deployed().then(function(instance) {
+      dmv = instance;      
+      return dmv.QueryNumber.call(plate);
+    }).then(function(value) {
+        console.log(value);
+        $("#vehicle_plate").text(value[0]);
+        $("#vehicle_vin").text(value[1]);
+        $("#vehicle_addr").text("");
+
+        $("#vehicle_insurance").text( value[2] ? "Valid":"Invalid" );
+        $("#vehicle_sticker").text( value[3] ? "Valid":"Invalid" );
+    }).catch(function(e) {
+      self.showAlert(e);
+    });
+  },
+  validateVehicleByPlate: function(plate){
+    var self = this;
+    var dmv;
+
+    dmvContract.deployed().then(function(instance) {
+      dmv = instance;
+      return dmv.ValidatePlateNumber.call(plate);
+    }).then(function(value) {
+      $("#box_vehicle").fadeOut('slow', function() {
+        $("#vehicle_plate").text(plate);
+        $("#vehicle_vin").text("");
+        $("#vehicle_addr").text("");
+        $("#vehicle_insurance").text("");
+        $("#vehicle_sticker").text("");
+
+        if (value) {
+          $("#vehicle_validation").text("Valid");
+          self.searchVehicleByPlate(plate);
+          $("#box_vehicle_info").show();
+        }else{
+          $("#vehicle_validation").text("Invalid");
+          $("#box_vehicle_info").hide();
+        }
+        $("#box_vehicle").fadeIn();
+      });
+    }).catch(function(e) {
+      self.showAlert(e);
+    });
+  },
+  searchVehicle: function() {
+    var self = this;
+    var plate = $("#input_search_vehicle").val();
+    self.validateVehicleByPlate(plate);
+  },
+  revokeVehicle: function() {
+    var self = this;
+    var dmv;
+    var plate = $("#vehicle_plate").text();
+
+    dmvContract.deployed().then(function(instance) {
+      dmv = instance;
+      return dmv.RevokePlate(plate, {from:account});
+    }).then(function() {
+      self.validateVehicleByPlate(plate);
+
+    }).catch(function(e) {
+      self.showAlert(e);
+    });
+  },
+
+  addVehicle: function() {
+    event.preventDefault();
+    var self = this;
+    var dmv;
+    var plate = $("#input_add_vehicle_1").val();
+    var vin = $("#input_add_vehicle_2").val();
+    var sticker_date = $("#input_add_vehicle_3").val();
+    var insurance_date = $("#input_add_vehicle_4").val();
+
+    dmvContract.deployed().then(function(instance) {
+      dmv = instance;
+      return dmv.CreatePlate(plate,vin, {from:account,gas:10000000});
+    }).then(function() {
+      self.showSuccess("Vehicle Added");
+    }).catch(function(e) {
+      self.showAlert(e);
     });
   }
+
 };
+
 
 window.addEventListener('load', function() {
   // Checking if Web3 has been injected by the browser (Mist/MetaMask)
