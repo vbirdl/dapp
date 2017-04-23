@@ -132,7 +132,7 @@ contract DMVBase is AuthorityBase
         _;
     }
 
-    function query(bytes32 key) private _OwnerOrApprovedInsurer returns (string o_number, string o_vin, int256 o_sticker_expiry_date, address o_insurer)
+    function query(bytes32 key) private _OwnerOrApprovedInsurer returns (string o_number, string o_vin, int256 o_sticker_expiry_date, address o_insurer, int256 o_insurance_expiry_date)
     {
         plate_t plate = plates[key];
         if (plate.valid)
@@ -141,6 +141,7 @@ contract DMVBase is AuthorityBase
             o_vin = plate.vin;
             o_sticker_expiry_date = plate.sticker_expiry_date;
             o_insurer = plate.insurer;
+            o_insurance_expiry_date = plate.insurance_expiry_date;
         }
         else
         {
@@ -148,7 +149,7 @@ contract DMVBase is AuthorityBase
         }
     }
 
-    function CreatePlate(string number, string vin) _OnlyOwner
+    function CreatePlate(string number, string vin, int256 sticker_expiry_date, address insurer, int256 insurance_expiry_date) _OnlyOwner
     {
         bytes32 key =  hash(number);
         if (!plates[key].valid)
@@ -156,6 +157,9 @@ contract DMVBase is AuthorityBase
             plates[key].valid = true;
             plates[key].number = number;
             plates[key].vin = vin;
+            plates[key].sticker_expiry_date = sticker_expiry_date;
+            plates[key].insurer = insurer;
+            plates[key].insurance_expiry_date = insurance_expiry_date;
             vin_to_key[hash(vin)] = key;
         }
         else
@@ -197,11 +201,11 @@ contract DMVBase is AuthorityBase
             return;
         }
     }
-    function QueryNumber(string number) returns (string o_number, string o_vin, int256 o_sticker_expiry_date, address o_insurer)
+    function QueryNumber(string number) returns (string o_number, string o_vin, int256 o_sticker_expiry_date, address o_insurer, int256 o_insurance_expiry_date)
     {
         return query(hash(number));
     }
-    function QueryVIN(string vin) returns (string o_number, string o_vin, int256 o_sticker_expiry_date, address o_insurer)
+    function QueryVIN(string vin) returns (string o_number, string o_vin, int256 o_sticker_expiry_date, address o_insurer, int256 o_insurance_expiry_date)
     {
         return query(vin_to_key[hash(vin)]);
     }
