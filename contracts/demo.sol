@@ -1,4 +1,5 @@
 pragma solidity ^0.4.0;
+
 contract ContractBase
 {
     address public _owner;
@@ -86,6 +87,7 @@ contract Insurer is ContractBase
         }
     }
 }
+
 
 contract DMV is ContractBase
 {

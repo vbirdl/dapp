@@ -8577,6 +8577,9 @@ body.md-skin {
   position: relative;
   left: 50%;
   top: 50%;
-  margin-left: -27px;
+  margin-left: -25px;
   margin-top: -25px;
+}
+#box_insurance{
+  display: none;
 }

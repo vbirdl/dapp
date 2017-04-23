@@ -1,8 +1,6 @@
-var ConvertLib = artifacts.require("./ConvertLib.sol");
-var MetaCoin = artifacts.require("./MetaCoin.sol");
+var InsurerContract = artifacts.require("Insurer");
+var DMVContract = artifacts.require("DMV");
 
 module.exports = function(deployer) {
-  deployer.deploy(ConvertLib);
-  deployer.link(ConvertLib, MetaCoin);
-  deployer.deploy(MetaCoin);
+  deployer.deploy(DMVContract,"Ontario");
 };

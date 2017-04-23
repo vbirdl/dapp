@@ -1,21 +1,16 @@
 // Import the page's CSS. Webpack will know what to do with it.
 // import "../stylesheets/app.css";
 
-// import "../stylesheets/bootstrap.css";
-// import "../font-awesome/css/font-awesome.css";
-// import "../stylesheets/animate.css";
-// import "../stylesheets/style.css";
-
 
 // Import libraries we need.
 import { default as Web3} from 'web3';
 import { default as contract } from 'truffle-contract'
 
 // Import our contract artifacts and turn them into usable abstractions.
-import metacoin_artifacts from '../../build/contracts/MetaCoin.json'
+import dmv_artifacts from '../../build/contracts/DMV.json'
 
 // MetaCoin is our usable abstraction, which we'll use through the code below.
-var MetaCoin = contract(metacoin_artifacts);
+var dmvContract = contract(dmv_artifacts);
 
 // The following code is simple to show off interacting with your contracts.
 // As your needs grow you will likely need to change its form and structure.
@@ -26,9 +21,9 @@ var account;
 window.App = {
   start: function() {
     var self = this;
-console.log('kkkkkkkk');
+
     // Bootstrap the MetaCoin abstraction for Use.
-    MetaCoin.setProvider(web3.currentProvider);
+    dmvContract.setProvider(web3.currentProvider);
 
     // Get the initial account balance so it can be displayed.
     web3.eth.getAccounts(function(err, accs) {
@@ -44,14 +39,37 @@ console.log('kkkkkkkk');
 
       accounts = accs;
       account = accounts[0];
-
-      self.refreshBalance();
     });
   },
 
   setStatus: function(message) {
     var status = document.getElementById("status");
     status.innerHTML = message;
+  },
+
+  searchInsurance: function() {
+    var self = this;
+    var dmv;
+    var keyword = $("#input_search_insurance").val();
+
+    dmvContract.deployed().then(function(instance) {
+      $("#box_insurance").fadeOut();
+      dmv = instance;
+      return dmv.IsApprovedInsurer.call(keyword, {from: account});
+
+    }).then(function(value) {
+      $("#insurance_address").text(keyword);
+      if (value) {
+        $("#insurance_validation").text("Valid");
+      }else{
+        $("#insurance_validation").text("Invalid");
+      }
+      $("#box_insurance").fadeIn();
+
+    }).catch(function(e) {
+      console.log(e);
+      self.setStatus("Error search insurance; see log.");
+    });
   },
 
   refreshBalance: function() {
