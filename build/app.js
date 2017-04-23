@@ -22320,7 +22320,7 @@ module.exports = {
 		}
 	},
 	"schema_version": "0.0.5",
-	"updated_at": 1492957453351
+	"updated_at": 1492958045517
 };
 
 /***/ }),
