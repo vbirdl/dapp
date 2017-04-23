@@ -1,6 +1,7 @@
 pragma solidity ^0.4.0;
 contract ContractBase
 {
+    string internal _name;
     address public _owner;
     function ContractBase() internal
     {
@@ -14,6 +15,10 @@ contract ContractBase
     function hash(string str) internal returns (bytes32 ret)
     {
         return keccak256(str);
+    }
+    function Name() constant returns (string)
+    {
+        return _name;
     }
 }
 
@@ -50,7 +55,9 @@ contract AuthorityBase is ContractBase
 contract Authority_AU is AuthorityBase
 {
     function Authority_AU()
-    {}
+    {
+        _name = "Government of Australia";
+    }
 }
 
 contract Authority_AUQLD is AuthorityBase
@@ -58,13 +65,16 @@ contract Authority_AUQLD is AuthorityBase
     function Authority_AUQLD(address AuthAU)
     {
         UpdateSupervisingAuthority(AuthAU);
+        _name = "Government of Queensland";
     }
 }
 
 contract Authority_CA is AuthorityBase
 {
     function Authority_CA()
-    {}
+    {
+        _name = "Government of Canada";
+    }
 }
 
 contract Authority_CAON is AuthorityBase
@@ -72,13 +82,16 @@ contract Authority_CAON is AuthorityBase
     function Authority_CAON(address AuthCA)
     {
         UpdateSupervisingAuthority(AuthCA);
+        _name = "Government of Ontario";
     }
 }
 
 contract Authority_US is AuthorityBase
 {
     function Authority_US()
-    {}
+    {
+        _name = "Government of U.S.A.";
+    }
 }
 
 contract Authority_USFL is AuthorityBase
@@ -86,6 +99,7 @@ contract Authority_USFL is AuthorityBase
     function Authority_USFL(address AuthUS)
     {
         UpdateSupervisingAuthority(AuthUS);
+        _name = "Government of Florida";
     }
 }
 
@@ -215,18 +229,27 @@ contract DMVBase is AuthorityBase
 
 contract QueenslandDepartmentOfTransportAndMainRoads is DMVBase
 {
-    function QueenslandDepartmentOfTransportAndMainRoads()
-    {}
+    function QueenslandDepartmentOfTransportAndMainRoads(address AuthQUQLD)
+    {
+        UpdateSupervisingAuthority(AuthQUQLD);
+        _name = "Queensland Department of Transport and Main Roads";
+    }
 }
 
 contract OntarioMinistryOfTransportation is DMVBase
 {
-    function OntarioMinistryOfTransportation()
-    {}
+    function OntarioMinistryOfTransportation(address AuthCAON)
+    {
+        UpdateSupervisingAuthority(AuthCAON);
+        _name = "Ontario Ministry of Transportation";
+    }
 }
 
 contract FloridaDepartmentOfMotorVehicles is DMVBase
 {
-    function FloridaDepartmentOfMotorVehicles()
-    {}
+    function FloridaDepartmentOfMotorVehicles(address AuthUSFL)
+    {
+        UpdateSupervisingAuthority(AuthUSFL);
+        _name = "Florida Department of Motor Vehicles";
+    }
 }
