@@ -118,12 +118,21 @@ window.App = {
       return dmv.QueryNumber.call(plate);
     }).then(function(value) {
         console.log(value);
+        var sticker_date = new Date(value[2]*1000);
+        var insurance_date = new Date(value[4]*1000);
+        var date_now = new Date();
+
+        console.log(sticker_date);
+        console.log(insurance_date);
+
         $("#vehicle_plate").text(value[0]);
         $("#vehicle_vin").text(value[1]);
-        $("#vehicle_addr").text("");
+        $("#vehicle_sticker_date").text(sticker_date.toISOString().slice(0,10));
+        $("#vehicle_insurance_addr").text(value[3]);
+        $("#vehicle_insurance_date").text(insurance_date.toISOString().slice(0,10));
 
-        $("#vehicle_insurance").text( value[2] ? "Valid":"Invalid" );
-        $("#vehicle_sticker").text( value[3] ? "Valid":"Invalid" );
+        $("#vehicle_insurance").text( insurance_date>date_now ? "Valid":"Invalid" );
+        $("#vehicle_sticker").text( sticker_date>date_now ? "Valid":"Invalid" );
     }).catch(function(e) {
       self.showAlert(e);
     });
@@ -184,12 +193,17 @@ window.App = {
     var dmv;
     var plate = $("#input_add_vehicle_1").val();
     var vin = $("#input_add_vehicle_2").val();
-    var sticker_date = $("#input_add_vehicle_3").val();
-    var insurance_date = $("#input_add_vehicle_4").val();
+    var sticker_date = new Date( $("#input_add_vehicle_3").val().replace( /(\d{2})-(\d{2})-(\d{4})/, "$2/$1/$3") );
+    var insurance_date = new Date( $("#input_add_vehicle_4").val().replace( /(\d{2})-(\d{2})-(\d{4})/, "$2/$1/$3") );
+    var insurance_addr = $("#input_add_vehicle_5").val();
+
+
+    sticker_date = Math.floor(sticker_date / 1000);
+    insurance_date = Math.floor(insurance_date / 1000);
 
     dmvContract.deployed().then(function(instance) {
       dmv = instance;
-      return dmv.CreatePlate(plate,vin, {from:account,gas:10000000});
+      return dmv.CreatePlate(plate,vin,sticker_date,insurance_addr,insurance_date, {from:account,gas:10000000});
     }).then(function() {
       self.showSuccess("Vehicle Added");
     }).catch(function(e) {
